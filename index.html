@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Ehaldart Global FX & Binary | Bi-Directional Institutional AI Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: { colors: { darker: '#030712', cardbg: '#0d1b2a', accent: '#10b981', gold: '#FFD700', fxgreen: '#00ff88' } }
+            }
+        }
+    </script>
+    <style>
+        .fx-glow { text-shadow: 0 0 30px rgba(0, 255, 136, 0.7); }
+        .wallpaper-bg { background-color: #030712; background-image: radial-gradient(circle at 50% 15%, rgba(0, 255, 136, 0.1) 0%, transparent 50%), radial-gradient(circle at 10% 80%, rgba(59, 130, 246, 0.08) 0%, transparent 40%); }
+        .trading-grid-bg { background-image: linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px); background-size: 20px 20px; }
+    </style>
+</head>
+<body class="wallpaper-bg trading-grid-bg text-slate-100 font-sans min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-white">
+
+    <!-- PROFIT NOTIFICATION BANNER -->
+    <div id="profit-toast-banner" class="fixed top-20 right-6 z-50 transform translate-x-full opacity-0 transition-all duration-500 pointer-events-none">
+        <div class="bg-slate-950/95 border-2 border-emerald-500 rounded-2xl p-4 shadow-[0_0_35px_rgba(0,255,136,0.4)] backdrop-blur-xl flex items-center space-x-3.5">
+            <div class="bg-emerald-500/20 p-2.5 rounded-xl border border-emerald-500/40 text-fxgreen text-lg">📉 ✅</div>
+            <div>
+                <div class="text-[10px] font-mono font-bold tracking-widest text-fxgreen uppercase">COURTESY OF ELHADARTGLOBALFX 📉 ✅</div>
+                <div id="profit-toast-details" class="text-xs font-bold text-white mt-0.5">Take Profit Hit • Execution Secured</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SPLASH SCREEN (AUTO-DISMISSES IN 4 SECONDS OR CLICK ENTER) -->
+    <div id="splash-screen" class="fixed inset-0 z-50 bg-[#030712] flex flex-col items-center justify-center p-6 transition-opacity duration-700">
+        <div class="max-w-xl w-full bg-slate-950/95 border-2 border-fxgreen/60 rounded-3xl p-8 shadow-[0_0_90px_rgba(0,255,136,0.35)] text-center space-y-5 backdrop-blur-xl relative overflow-hidden">
+            <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 via-gold to-emerald-500"></div>
+            
+            <div class="space-y-2 relative z-10">
+                <span class="text-[10px] font-mono tracking-widest bg-emerald-950/90 text-fxgreen px-3 py-1 rounded-full border border-fxgreen/50 uppercase">🔥 Live Deriv Feed & Bi-Directional Matrix Active</span>
+                <div class="text-3xl md:text-4xl font-black tracking-tight text-white pt-2">EHALDART</div>
+                <div class="flex items-center justify-center space-x-3">
+                    <span class="text-xl md:text-2xl font-extrabold tracking-widest text-slate-200">GLOBAL</span>
+                    <span class="text-3xl md:text-4xl font-black text-fxgreen fx-glow italic tracking-tighter border-2 border-fxgreen px-3 py-1 rounded-xl bg-emerald-950/50">FX</span>
+                </div>
+                <p class="text-xs text-slate-300 font-mono max-w-md mx-auto pt-1 leading-relaxed">
+                    "Streaming Live Deriv Ticks, Bi-Directional Auto-Pivots (Digits ⇄ Rise/Fall), Over/Under, Differs, Multipliers & Accumulators..."
+                </p>
+            </div>
+
+            <div class="space-y-2 relative z-10 pt-1">
+                <div class="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-slate-700">
+                    <div id="core-progress-bar" class="bg-gradient-to-r from-emerald-500 to-fxgreen h-full w-full transition-all duration-300 shadow-[0_0_20px_rgba(0,255,136,0.6)]"></div>
+                </div>
+                <div class="flex justify-between items-center text-xs font-mono text-slate-400">
+                    <span id="loading-status-text" class="text-fxgreen">Live Ticks & Scanners Online!</span>
+                    <span id="loading-timer-display" class="text-fxgreen font-bold">ACTIVE</span>
+                </div>
+            </div>
+
+            <div class="relative z-10 pt-1">
+                <button onclick="dismissSplash()" class="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-fxgreen hover:text-slate-950 text-white font-black tracking-wider text-xs py-3 rounded-xl shadow-[0_0_25px_rgba(0,255,136,0.5)] transition uppercase">
+                    🚀 ENTER LIVE TERMINAL NOW
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SIGN-IN & REGISTRATION MODAL -->
+    <div id="auth-modal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-5">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <div class="flex space-x-4">
+                    <button id="tab-signin" onclick="switchAuthTab('signin')" class="text-sm font-bold text-fxgreen border-b-2 border-fxgreen pb-1">SIGN IN</button>
+                    <button id="tab-signup" onclick="switchAuthTab('signup')" class="text-sm font-bold text-slate-400 hover:text-white pb-1">REGISTER / SIGN UP</button>
+                </div>
+                <button onclick="toggleAuthModal(false)" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
+            </div>
+            
+            <div class="space-y-3 text-xs font-mono">
+                <div id="name-field-box" class="hidden">
+                    <label class="text-slate-400">Full Name</label>
+                    <input id="auth-name" type="text" value="Preston Mutugi" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white mt-1">
+                </div>
+                <div>
+                    <label class="text-slate-400">Email Address</label>
+                    <input id="auth-email" type="email" value="jamalelhadart@gmail.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white mt-1">
+                </div>
+                <div>
+                    <label class="text-slate-400">Password</label>
+                    <input id="auth-pass" type="password" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white mt-1">
+                </div>
+                <button onclick="submitAuthForm()" id="auth-submit-btn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl uppercase transition shadow-[0_0_15px_rgba(0,255,136,0.3)]">SIGN IN TO TERMINAL</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HEADER -->
+    <header class="bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80 px-6 py-3 flex flex-wrap items-center justify-between gap-4 sticky top-0 z-40">
+        <div class="flex items-center space-x-3">
+            <div class="w-3 h-3 bg-fxgreen rounded-full animate-ping"></div>
+            <div>
+                <span class="font-black tracking-widest text-emerald-400 text-sm block">EHALDART INSTITUTIONAL AI TERMINAL</span>
+                <span id="header-asset-count" class="text-[10px] font-mono text-fxgreen">33 Live Markets Streaming</span>
+            </div>
+        </div>
+        <div class="flex items-center space-x-3 flex-wrap">
+            <span id="stream-status-badge" class="text-[10px] font-mono font-bold text-fxgreen bg-emerald-950 px-2.5 py-1 rounded border border-emerald-700">📡 Live Stream & Bi-Directional AI Active</span>
+            <span id="oauth-connection-badge" class="text-[10px] font-mono font-bold text-amber-300 bg-slate-900 px-2.5 py-1 rounded border border-slate-700">🔌 Simulation Mode</span>
+            <button onclick="toggleTerminalAudio()" class="bg-slate-900 hover:bg-slate-800 text-fxgreen text-xs font-mono font-bold px-3 py-1.5 rounded-xl border border-fxgreen/30">
+                <span id="audio-status-icon">🔊</span> <span id="audio-status-text">SFX ON</span>
+            </button>
+            <div class="flex bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs">
+                <button id="btn-demo" onclick="setMode('demo')" class="px-3 py-1 rounded-lg font-bold bg-emerald-600 text-white transition">DEMO</button>
+                <button id="btn-real" onclick="setMode('real')" class="px-3 py-1 rounded-lg font-semibold text-slate-400 hover:text-white transition">REAL</button>
+            </div>
+            <div class="text-right">
+                <div id="account-id-label" class="text-[10px] text-slate-400 uppercase font-mono">Demo Balance</div>
+                <div id="account-balance" class="text-sm font-bold font-mono text-emerald-400">$1,000.00</div>
+            </div>
+            <button onclick="toggleAuthModal(true)" class="bg-emerald-600/20 hover:bg-emerald-600 text-fxgreen hover:text-white text-xs font-bold px-3.5 py-2 rounded-xl border border-emerald-500/40 transition">Sign In / Up</button>
+            <button onclick="authDeriv()" id="btn-oauth-connect" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-[0_0_15px_rgba(0,255,136,0.3)]">Connect Deriv OAuth</button>
+        </div>
+    </header>
+
+    <!-- MAIN GRID -->
+    <main class="flex-1 max-w-[1680px] w-full mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+        <!-- COLUMN 1: EXHAUSTIVE SCANNER WITH TPS VELOCITY & DUAL-SIGNAL TAGS -->
+        <div class="space-y-6">
+            <div class="bg-slate-950/85 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-4 shadow-2xl space-y-3 relative">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-300">Exhaustive Market Radar</h2>
+                    <span class="text-[10px] font-mono text-fxgreen">A+ Sigma ≥ 2.4σ</span>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-1 text-[10px] font-mono">
+                    <button onclick="switchCategory('all')" id="cat-all" class="bg-emerald-600 text-white font-bold py-1.5 px-1 rounded-lg transition">All</button>
+                    <button onclick="switchCategory('synthetic_index')" id="cat-synthetic_index" class="bg-slate-900 text-slate-300 hover:text-white py-1.5 px-1 rounded-lg transition border border-slate-800">Synthetics</button>
+                    <button onclick="switchCategory('forex')" id="cat-forex" class="bg-slate-900 text-slate-300 hover:text-white py-1.5 px-1 rounded-lg transition border border-slate-800">Forex</button>
+                    <button onclick="switchCategory('commodities')" id="cat-commodities" class="bg-slate-900 text-slate-300 hover:text-white py-1.5 px-1 rounded-lg transition border border-slate-800">Commodity</button>
+                    <button onclick="switchCategory('indices')" id="cat-indices" class="bg-slate-900 text-slate-300 hover:text-white py-1.5 px-1 rounded-lg transition border border-slate-800">Indices</button>
+                    <button onclick="switchCategory('cryptocurrency')" id="cat-cryptocurrency" class="bg-slate-900 text-slate-300 hover:text-white py-1.5 px-1 rounded-lg transition border border-slate-800">Crypto</button>
+                </div>
+
+                <div class="grid grid-cols-3 text-[10px] font-mono text-slate-400 border-b border-slate-800 pb-1 px-1 pt-1">
+                    <div>ASSET & VOLATILITY</div>
+                    <div class="text-right">PRICE & REGIME</div>
+                    <div class="text-right">BOAT / SIGMA</div>
+                </div>
+                <div id="scanner-market-list" class="space-y-1.5 max-h-[340px] overflow-y-auto text-[11px] font-mono">
+                    <div class="text-fxgreen text-center py-4 animate-pulse">Connecting Live Ticks...</div>
+                </div>
+            </div>
+
+            <!-- USD Multi-Currency Converter -->
+            <div class="bg-slate-950/85 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-4 shadow-2xl space-y-3">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-300">USD Multi-Currency Converter</h2>
+                <div class="grid grid-cols-2 gap-2">
+                    <input id="conv-amt" type="number" value="100" class="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
+                    <select id="conv-curr" class="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
+                        <option value="KES">KES (Kenya)</option>
+                        <option value="UGX">UGX (Uganda)</option>
+                        <option value="TZS">TZS (Tanzania)</option>
+                        <option value="EUR">EUR (Euro)</option>
+                        <option value="GBP">GBP (Pound)</option>
+                    </select>
+                </div>
+                <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800 flex justify-between text-xs">
+                    <span class="text-slate-400">Equivalent:</span>
+                    <span id="conv-result" class="font-mono font-bold text-fxgreen">12,900.00 KES</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMN 2 & 3: TRADINGVIEW CHART + DUAL-INDICATOR DERIV BOT DISPATCHER & 9-BOAT WALLET -->
+        <div class="lg:col-span-2 space-y-6">
+            <div id="chart-card-wrapper" class="bg-slate-950/85 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-4 shadow-2xl space-y-3 transition-all duration-300">
+                <div class="flex flex-wrap justify-between items-center gap-2">
+                    <div>
+                        <h2 id="chart-title-label" class="text-xs font-bold uppercase tracking-wider text-fxgreen">TradingView Institutional Suite</h2>
+                        <span id="chart-sub-label" class="text-[10px] font-mono text-slate-400">Fast Millisecond & Slow Deriv Candle Dual Engine</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="toggleChartFullscreen()" id="expand-chart-btn" class="bg-emerald-600/20 hover:bg-emerald-600 text-fxgreen hover:text-white text-[10px] font-mono font-bold px-2.5 py-1 rounded-lg border border-emerald-500/40 transition flex items-center space-x-1">
+                            <span>⛶</span> <span id="expand-btn-text">Expand Chart</span>
+                        </button>
+                        <div class="flex flex-wrap space-x-1 text-[10px] font-mono">
+                            <button onclick="changeChartTimeframe('1')" class="tf-btn px-2 py-1 rounded bg-slate-900 border border-slate-800 text-slate-300 hover:border-fxgreen" data-tf="1">1m</button>
+                            <button onclick="changeChartTimeframe('5')" class="tf-btn px-2 py-1 rounded bg-slate-900 border border-slate-800 text-slate-300 hover:border-fxgreen" data-tf="5">5m</button>
+                            <button onclick="changeChartTimeframe('15')" class="tf-btn px-2 py-1 rounded bg-emerald-600 text-white font-bold" data-tf="15">15m</button>
+                            <button onclick="changeChartTimeframe('60')" class="tf-btn px-2 py-1 rounded bg-slate-900 border border-slate-800 text-slate-300 hover:border-fxgreen" data-tf="60">1h</button>
+                            <button onclick="changeChartTimeframe('D')" class="tf-btn px-2 py-1 rounded bg-slate-900 border border-slate-800 text-slate-300 hover:border-fxgreen" data-tf="D">1D</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="chart-view-port" class="bg-slate-900 rounded-xl border border-slate-800 p-2 relative h-[320px] transition-all">
+                    <div id="tradingview_advanced_chart" class="w-full h-full"></div>
+                </div>
+            </div>
+
+            <!-- DUAL-INDICATOR DERIV BOT SIGNAL DISPATCHER & 9-BOAT MILLISECOND WALLET -->
+            <div class="bg-slate-950/85 backdrop-blur-xl border-2 border-gold rounded-2xl p-4 shadow-2xl space-y-3">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xs font-bold uppercase tracking-wider text-gold">🤖 Deriv Bot & App Signal Dispatcher (Bi-Directional AI)</h2>
+                        <span class="text-[10px] font-mono text-slate-300">Auto-Shifting (Digits ⇄ Rise/Fall ⇄ Differs ⇄ Multipliers/Accumulators) + NULL Guard</span>
+                    </div>
+                    <span id="deriv-bot-status-badge" class="text-[10px] font-mono font-bold text-slate-950 bg-gold px-2.5 py-1 rounded">A+ SIGNAL READY</span>
+                </div>
+
+                <!-- DUAL INDICATOR SPLIT -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs font-mono">
+                    <div class="bg-slate-900/95 p-3 rounded-xl border border-emerald-500/40 space-y-1.5">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] font-bold text-fxgreen uppercase">📊 Indicator 1: Digits, Differs & Accums</span>
+                            <span id="ind1-winrate-badge" class="text-[9px] bg-emerald-950 text-fxgreen px-1.5 py-0.5 rounded border border-emerald-700 font-bold">2.5σ A+</span>
+                        </div>
+                        <div id="ind1-signal-title" class="text-white font-bold text-xs">Scanning Exhaustive Digit Matrix...</div>
+                        <div class="text-[10px] text-slate-300">
+                            <span class="text-slate-400">Entry & Exit (EP/XP):</span> <span id="ind1-ep-trigger" class="text-gold font-bold">Active</span>
+                        </div>
+                        <div class="text-[10px] text-slate-300">
+                            <span class="text-slate-400">Recommended Boat:</span> <span id="ind1-boat-rec" class="text-fxgreen font-bold">Boat 9 (Digit Matrixer)</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/95 p-3 rounded-xl border border-blue-500/40 space-y-1.5">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] font-bold text-blue-400 uppercase">📈 Indicator 2: Rise/Fall & Multipliers</span>
+                            <span id="ind2-winrate-badge" class="text-[9px] bg-blue-950 text-blue-300 px-1.5 py-0.5 rounded border border-blue-700 font-bold">2.6σ A+</span>
+                        </div>
+                        <div id="ind2-signal-title" class="text-white font-bold text-xs">Evaluating Momentum & Breakouts...</div>
+                        <div class="text-[10px] text-slate-300">
+                            <span class="text-slate-400">Entry & Exit (EP/XP):</span> <span id="ind2-ep-trigger" class="text-gold font-bold">Active</span>
+                        </div>
+                        <div class="text-[10px] text-slate-300">
+                            <span class="text-slate-400">Recommended Boat:</span> <span id="ind2-boat-rec" class="text-blue-400 font-bold">Boat 2 (Tick Scalper)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DISPATCHER PARAMETERS ROW -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs font-mono">
+                    <div class="bg-slate-900 p-2 rounded-xl border border-slate-800">
+                        <div class="text-[9px] text-slate-400 uppercase">Asset Market</div>
+                        <div id="dbot-param-asset" class="text-white font-bold text-xs mt-0.5">1HZ10V</div>
+                    </div>
+                    <div class="bg-slate-900 p-2 rounded-xl border border-slate-800">
+                        <div class="text-[9px] text-slate-400 uppercase">Active Regime & TF</div>
+                        <div id="dbot-param-contract" class="text-fxgreen font-bold text-[11px] mt-0.5">ACTIVE</div>
+                    </div>
+                    <div class="bg-slate-900 p-2 rounded-xl border border-slate-800">
+                        <div class="text-[9px] text-slate-400 uppercase">Duration & Hold</div>
+                        <div id="dbot-param-ticks" class="text-gold font-bold text-xs mt-0.5">2 Ticks</div>
+                    </div>
+                    <div class="bg-slate-900 p-2 rounded-xl border border-slate-800">
+                        <div class="text-[9px] text-slate-400 uppercase">Sigma & Runs</div>
+                        <div id="dbot-param-runs" class="text-blue-400 font-bold text-xs mt-0.5">2.6σ • 5 Runs</div>
+                    </div>
+                </div>
+
+                <!-- SMALL WALLET OF 9 CLICKABLE MILLISECOND & TICK BOATS FOR DERIV EXECUTION -->
+                <div class="bg-slate-900/90 p-2.5 rounded-xl border border-gold/40 space-y-2">
+                    <div class="flex justify-between items-center text-[10px] font-mono">
+                        <span class="text-gold font-bold uppercase">💼 Quick-Tap 9-Boat Millisecond & Tick Wallet</span>
+                        <span id="dispatcher-wallet-active-label" class="text-fxgreen font-bold">Selected: Boat 9 (Digit Matrixer)</span>
+                    </div>
+                    <div class="grid grid-cols-3 sm:grid-cols-9 gap-1.5 text-[9px] font-mono text-center">
+                        <button onclick="selectAndLaunchBoat(1)" id="wallet-boat-1" class="py-1.5 px-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-300 hover:border-gold transition">
+                            <div class="font-bold">B1</div>
+                            <div class="text-[7px] text-slate-400 truncate">OB Snip</div>
+                        </button>
+                        <button onclick="selectAndLaunchBoat(2)" id="wallet-boat-2" class="py-1.5 px-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-300 hover:border-gold transition">
+                            <div class="font-bold">B2</div>
+                            <div class="text-[7px] text-slate-400 truncate">Rise/Fall</div>
+                        </button>
+                        <button onclick="selectAndLaunchBoat(3)" id="wallet-boat-3" class="py-1.5 px-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-300 hover:border-gold transition">
+                            <div class="font-bold">B3</div>
+                            <div class="text-[7px] text-slate-400 truncate">Sweep</div>
+                        </button>
+                        <button onclick="selectAndLaunchBoat(4)" id="wallet-boat-4" class="py-1.5 px-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-300 hover:border-gold transition">
+                            <div class="font-bold">B4</div>
+                            <div class="text-[7px] text-slate-400 truncate">FVG</div>
+                        </button>
+                        <button onclick="selectAndLaunchBoat(5)" id="wallet-boat-5" class="py-1.5 px-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-300 hover:border-gold transition">
+                            <div class="font-bold">B5</div>
+                            <div class="text-[7px] text-slate-400 truncate">BOS</div>
+                        </button>
+                        <button onclick="selectAndLaunchBoat(6)" id="wallet-boat-6" class="py-1.5 px-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-300 hover:border-gold transition">
+                            <div class="font-bold">B6</div>
+                            <div class="text-[7px] text-slate-400 truncate">CHOCH</div>
+                        </button>
+                        <button onclick="selectAndLaunchBoat(7)" id="wallet-boat-7" class="py-1.5 px-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-300 hover:border-gold transition">
+                            <div class="font-bold">B7</div>
+                            <div class="text-[7px] text-slate-400 truncate">Trend</div>
+                        </button>
+                        <button onclick="selectAndLaunchBoat(8)" id="wallet-boat-8" class="py-1.5 px-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-300 hover:border-gold transition">
+                            <div class="font-bold">B8</div>
+                            <div class="text-[7px] text-slate-400 truncate">Evn/Odd</div>
+                        </button>
+                        <button onclick="selectAndLaunchBoat(9)" id="wallet-boat-9" class="py-1.5 px-1 rounded-lg bg-emerald-950 border-2 border-fxgreen text-fxgreen font-bold shadow-[0_0_8px_rgba(0,255,136,0.4)] transition">
+                            <div class="font-bold">B9 ⭐</div>
+                            <div class="text-[7px] text-gold truncate">Matrix</div>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 flex flex-wrap justify-between items-center gap-2 text-xs font-mono">
+                    <div>
+                        <span class="text-slate-400">Entry & Exit Points (EP / XP):</span>
+                        <span id="dbot-param-ep" class="text-white font-bold ml-1">Active Entry Trigger</span>
+                    </div>
+                    <button onclick="copyDerivBotParameters()" class="bg-gold hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-xl text-xs uppercase transition shadow-[0_0_15px_rgba(255,215,0,0.4)]">
+                        📋 COPY DERIV BOT PARAMS
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMN 4: MASTER BOAT BASKET & LIVE DIGIT HIT STREAM -->
+        <div class="space-y-6">
+            <div class="bg-slate-950/85 backdrop-blur-xl border border-emerald-500/60 rounded-2xl p-4 shadow-2xl space-y-3">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xs font-bold uppercase tracking-wider text-fxgreen">⚓ Master Boat Basket Hub</h2>
+                        <span class="text-[10px] font-mono text-gold">Bi-directionally auto-routes between Digits, Rise/Fall & Multipliers</span>
+                    </div>
+                    <span id="active-basket-boat-badge" class="text-[10px] font-mono font-bold text-slate-950 bg-fxgreen px-2 py-0.5 rounded">BOAT 9 ACTIVE</span>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 text-[10px] font-mono">
+                    <button onclick="selectAndLaunchBoat(1)" id="boat-card-1" class="p-2 rounded-xl border bg-slate-900 border-slate-800 text-left hover:border-fxgreen transition">
+                        <div class="font-bold text-white">Boat 1</div>
+                        <div class="text-[8px] text-slate-400">OB Sniper</div>
+                    </button>
+                    <button onclick="selectAndLaunchBoat(2)" id="boat-card-2" class="p-2 rounded-xl border bg-slate-900 border-slate-800 text-left hover:border-fxgreen transition">
+                        <div class="font-bold text-white">Boat 2</div>
+                        <div class="text-[8px] text-slate-400">Rise/Fall</div>
+                    </button>
+                    <button onclick="selectAndLaunchBoat(3)" id="boat-card-3" class="p-2 rounded-xl border bg-slate-900 border-slate-800 text-left hover:border-fxgreen transition">
+                        <div class="font-bold text-white">Boat 3</div>
+                        <div class="text-[8px] text-slate-400">Sweep Fade</div>
+                    </button>
+                    <button onclick="selectAndLaunchBoat(4)" id="boat-card-4" class="p-2 rounded-xl border bg-slate-900 border-slate-800 text-left hover:border-fxgreen transition">
+                        <div class="font-bold text-white">Boat 4</div>
+                        <div class="text-[8px] text-slate-400">FVG Rebal</div>
+                    </button>
+                    <button onclick="selectAndLaunchBoat(5)" id="boat-card-5" class="p-2 rounded-xl border bg-slate-900 border-slate-800 text-left hover:border-fxgreen transition">
+                        <div class="font-bold text-white">Boat 5</div>
+                        <div class="text-[8px] text-slate-400">BOS Follow</div>
+                    </button>
+                    <button onclick="selectAndLaunchBoat(6)" id="boat-card-6" class="p-2 rounded-xl border bg-slate-900 border-slate-800 text-left hover:border-fxgreen transition">
+                        <div class="font-bold text-white">Boat 6</div>
+                        <div class="text-[8px] text-slate-400">CHOCH Hunt</div>
+                    </button>
+                    <button onclick="selectAndLaunchBoat(7)" id="boat-card-7" class="p-2 rounded-xl border bg-slate-900 border-slate-800 text-left hover:border-fxgreen transition">
+                        <div class="font-bold text-white">Boat 7</div>
+                        <div class="text-[8px] text-slate-400">Trendline</div>
+                    </button>
+                    <button onclick="selectAndLaunchBoat(8)" id="boat-card-8" class="p-2 rounded-xl border bg-slate-900 border-slate-800 text-left hover:border-fxgreen transition">
+                        <div class="font-bold text-white">Boat 8</div>
+                        <div class="text-[8px] text-slate-400">Parity Shft</div>
+                    </button>
+                    <button onclick="selectAndLaunchBoat(9)" id="boat-card-9" class="p-2 rounded-xl border bg-emerald-950 border-fxgreen text-left shadow-[0_0_10px_rgba(0,255,136,0.3)] transition">
+                        <div class="font-bold text-fxgreen">Boat 9 ⭐</div>
+                        <div class="text-[8px] text-gold">Matrixer</div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- LIVE DIGIT HIT WINDOW & INTERACTIVE AUTO-TRANSACTION ROOM -->
+            <div class="bg-slate-950/85 backdrop-blur-xl border border-emerald-500/50 rounded-2xl p-4 shadow-2xl space-y-3">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xs font-bold uppercase tracking-wider text-fxgreen">Live Indicator & Auto-Room</h2>
+                        <span id="digit-active-mode-label" class="text-[10px] font-mono text-gold">Bi-Directional AI & NULL Filter</span>
+                    </div>
+                    <span id="streak-lock-badge" class="text-[10px] font-mono font-bold text-fxgreen bg-emerald-950 px-2 py-1 rounded border border-emerald-600">RUNS: 0/5 ACTIVE</span>
+                </div>
+
+                <!-- LIVE EXECUTION STAKE & AUTO-ARM CONTROL -->
+                <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800 flex items-center justify-between gap-2 text-xs font-mono">
+                    <div class="flex items-center space-x-2">
+                        <label class="text-slate-400 text-[10px]">STAKE ($):</label>
+                        <input id="trade-stake-input" type="number" min="0.35" step="0.5" value="1.00" class="w-16 bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-white font-bold text-xs">
+                    </div>
+                    <button id="toggle-auto-exec-btn" onclick="toggleAutoTradeExecution()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-lg text-[10px] uppercase transition shadow-[0_0_10px_rgba(0,255,136,0.3)]">
+                        ⚡ AUTO-EXEC: ON
+                    </button>
+                </div>
+
+                <!-- LIVE ROLLING DIGIT HIT STREAM -->
+                <div class="bg-slate-900/95 p-2 rounded-xl border border-slate-800 space-y-1">
+                    <div class="flex justify-between items-center text-[9px] font-mono text-slate-400">
+                        <span>LIVE TICK & DIGIT HIT STREAM</span>
+                        <span id="latest-hit-digit-badge" class="text-fxgreen font-bold">HIT: -</span>
+                    </div>
+                    <div id="live-digit-hit-stream" class="flex items-center justify-between gap-1 pt-1 overflow-x-auto">
+                        <span class="text-[10px] font-mono text-fxgreen py-1">Streaming live ticks...</span>
+                    </div>
+                </div>
+
+                <!-- 100% NORMALIZED DIGIT DISTRIBUTION GRID -->
+                <div class="grid grid-cols-5 gap-1.5 text-center font-mono text-xs">
+                    <div class="bg-slate-900 p-1.5 rounded-lg border border-slate-800"><div class="text-[7px] text-slate-500">0</div><div id="f-0" class="font-bold">10%</div></div>
+                    <div class="bg-slate-900 p-1.5 rounded-lg border border-slate-800"><div class="text-[7px] text-slate-500">1</div><div id="f-1" class="font-bold">10%</div></div>
+                    <div class="bg-slate-900 p-1.5 rounded-lg border border-slate-800"><div class="text-[7px] text-slate-500">2</div><div id="f-2" class="font-bold">10%</div></div>
+                    <div class="bg-slate-900 p-1.5 rounded-lg border border-slate-800"><div class="text-[7px] text-slate-500">3</div><div id="f-3" class="font-bold">10%</div></div>
+                    <div class="bg-slate-900 p-1.5 rounded-lg border border-slate-800"><div class="text-[7px] text-slate-500">4</div><div id="f-4" class="font-bold">10%</div></div>
+                    <div class="bg-slate-900 p-1.5 rounded-lg border border-slate-800"><div class="text-[7px] text-slate-500">5</div><div id="f-5" class="font-bold">10%</div></div>
+                    <div class="bg-slate-900 p-1.5 rounded-lg border border-slate-800"><div class="text-[7px] text-slate-500">6</div><div id="f-6" class="font-bold">10%</div></div>
+                    <div class="bg-slate-900 p-1.5 rounded-lg border border-slate-800"><div class="text-[7px] text-slate-500">7</div><div id="f-7" class="font-bold">10%</div></div>
+                    <div class="bg-slate-900 p-1.5 rounded-lg border border-slate-800"><div class="text-[7px] text-slate-500">8</div><div id="f-8" class="font-bold">10%</div></div>
+                    <div class="bg-slate-900 p-1.5 rounded-lg border border-slate-800"><div class="text-[7px] text-slate-500">9</div><div id="f-9" class="font-bold">10%</div></div>
+                </div>
+
+                <!-- SIGNAL DETAILS -->
+                <div class="bg-slate-900/90 p-3 rounded-xl border border-slate-800 text-[11px] font-mono space-y-2">
+                    <div class="flex justify-between border-b border-slate-800 pb-1">
+                        <span class="text-slate-400">Candle Hold & TF:</span>
+                        <span id="indicator-default-tf" class="text-gold font-bold text-right">Hold 1M (1-Minute Candle)</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-800 pb-1">
+                        <span class="text-slate-400">Active A+ Signal:</span>
+                        <span id="digit-signal-a" class="text-fxgreen font-bold text-right">Active</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-800 pb-1">
+                        <span class="text-slate-400">Entry & Exit Points (EP/XP):</span>
+                        <span id="digit-entry-exact" class="text-emerald-300 font-bold text-right">Active</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Auto-Run Room:</span>
+                        <span id="auto-run-room-status" class="text-fxgreen font-bold text-right">🟢 ARMED (Courtesy of ELHADARTGLOBALFX)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Killzones & Economic Calendar -->
+            <div class="bg-slate-950/85 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-4 shadow-2xl space-y-3">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-300">🗓️ Killzones & Calendar</h2>
+                    <span id="live-eat-clock" class="text-[10px] font-mono text-fxgreen font-bold">00:00:00 EAT</span>
+                </div>
+                <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800 text-[10px] font-mono space-y-1">
+                    <div id="active-killzone-status" class="text-fxgreen font-bold">🔥 London / NY Overlap Active</div>
+                    <div class="text-slate-300">📅 US NFP (First Friday): High Volatility Expected</div>
+                    <div class="text-gold">📅 US CPI & FOMC Rate Decision Active</div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-slate-950/90 backdrop-blur-md border-t border-slate-800/80 py-3 px-6 text-center text-xs text-slate-400 font-mono">
+        Ehaldart Global FX & Binary Institutional AI Terminal &copy; 2026 | Courtesy of ELHADARTGLOBALFX
+    </footer>
+
+    <script src="derivApi.js?v=20261115"></script>
+    <script src="aiBotsEngine.js?v=20261115"></script>
+    <script src="app.js?v=20261115"></script>
+</body>
+</html>
